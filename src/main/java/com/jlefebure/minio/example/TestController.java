@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/files")
@@ -24,7 +26,7 @@ public class TestController {
     private MinioService minioService;
 
     @GetMapping
-    public List<Item> testMinio() throws MinioException {
+    public List<Item> testMinio() {
         return minioService.list();
     }
 
@@ -45,8 +47,10 @@ public class TestController {
     @PostMapping
     public void addAttachement(@RequestParam("file") MultipartFile file) {
         Path path = Path.of(file.getOriginalFilename());
+        Map<String, String> header = new HashMap<>();
+        header.put("X-Incident-Id", "C918371984");
         try {
-            minioService.upload(path, file.getInputStream(), file.getContentType());
+            minioService.upload(path, file.getInputStream(), file.getContentType(), header);
         } catch (MinioException e) {
             throw new IllegalStateException("The file cannot be upload on the internal storage. Please retry later", e);
         } catch (IOException e) {
